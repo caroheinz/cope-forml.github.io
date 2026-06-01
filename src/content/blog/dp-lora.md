@@ -148,35 +148,26 @@ and $c$ is a constant.
 Figure 2: Example dependence of $\varepsilon$ on rank $r$ for fixed $d$ and $\delta$.
 {% endfigure %}
 
+
 ### Matrix case: without additive noise, projection-only is not DP
 
-LoRA is ultimately used on matrices, not just vectors.
-In the matrix case, the projection-only mechanism runs into a fundamental obstacle:
-for any two different gradient matrices $V, V'$ (from neighboring datasets), the transformed
-outputs are almost surely separated, which prevents any DP guarantee.
-$$\Pr(MV = MV') = 0 \quad \text{for } V \neq V'.$$
+LoRA is ultimately used on matrices, not just vectors. One might hope that the vector-case privacy guarantee extends to matrix-valued gradients, but this is false.
 
-### Why is this intuition true?
+The reason is that projection-only mechanisms do not add noise with full support. For a fixed matrix gradient $V$, the output
+$$Y = MV, \qquad M = ZZ^\top$$
 
-Write $M = A^\top A$ where $A \in \mathbb{R}^{r\times d}$ and each row of $A$ is a Gaussian
-random vector $\sim N(0, \tfrac{1}{r} I_d)$.
-Then,
-$$MV = MV' \quad \Longleftrightarrow \quad A^\top A(V - V') = 0.$$
+is not an arbitrary noisy perturbation of $V$. It always satisfies structural constraints determined by $V$. A neighboring gradient matrix $V'$ can impose different constraints, causing the two output distributions to be completely separated.
 
-A sufficient condition for this is $A(V - V') = 0$.
-But $V - V' \neq 0$ means its null space is a strictly lower-dimensional subspace.
-A continuous Gaussian vector (one row of $A$) lands exactly in that subspace with probability 0.
-So, almost surely, the projection distinguishes $V$ from $V'$.
+Formally, for any non-trivial matrix-valued query $f$, there exist neighboring datasets $S,S'$ and a measurable event $E$ such that
+$$\Pr(\mathcal A(S)\in E)=1,
+\qquad
+\Pr(\mathcal A(S')\in E)=0.$$
 
-{% callout 'Theorem 2 (Projection-only can break DP)', 'theorem' %}
-For the projection mechanism $\mathcal{A}(S)=M f(S)$ with a non-trivial matrix-valued query $f$, there exist neighboring datasets $S\sim_H S'$ and an event $E$ such that
-$$
-\Pr(\mathcal{A}(S)\in E)=1 \quad\text{and}\quad \Pr(\mathcal{A}(S')\in E)=0.
-$$
-So $\mathcal{A}$ is **not** $(\varepsilon,\delta)$-DP for any $\varepsilon$ and any $\delta<1$.
-{% endcallout %}
+Thus the projection mechanism is not $(\varepsilon,\delta)$-DP for any $\varepsilon$ and any $\delta<1$.
 
-In other words, projection by itself does not create the distributional overlap DP needs.
+The intuition is that matrix projection can leave dataset-dependent algebraic fingerprints. For example, if $V$ has a kernel direction $a$ with $Va=0$, but $V'a\neq 0$, then every output from $V$ satisfies $Ya=0$, while an output from $V'$ violates this almost surely. If $V$ has full column rank, a similar separation arises from symmetry constraints such as $V^\top Y$ being symmetric; for a non-aligned $V'$, this identity holds only with probability zero.
+
+Therefore, projection alone does not create the distributional overlap required by DP. This directly applies to the first step of standard LoRA with $B_0=0$, which can be written as a random projection of the gradient. LoRA's random initialization is therefore not "privacy for free": DP still requires additional additive noise.
 
 Empirically, we show this failure mode in a toy setting: for a small CNN trained with
 LoRA-FA (freezing random $A$ and only learning $B$) on CIFAR-10, a membership inference
