@@ -165,7 +165,7 @@ $$\Pr(\mathcal A(S)\in E)=1,
 
 Thus the projection mechanism is not $(\varepsilon,\delta)$-DP for any $\varepsilon$ and any $\delta<1$.
 
-The intuition is that matrix projection can leave dataset-dependent algebraic fingerprints. For example, if $V$ has a kernel direction $a$ with $Va=0$, but $V'a\neq 0$, then every output from $V$ satisfies $Ya=0$, while an output from $V'$ violates this almost surely. If $V$ has full column rank, a similar separation arises from symmetry constraints such as $V^\top Y$ being symmetric; for a non-aligned $V'$, this identity holds only with probability zero.
+The intuition is that matrix projection can leave dataset-dependent fingerprints. For example, if $V$ has a kernel direction $a$ with $Va=0$, but $V'a\neq 0$, then every output from $V$ satisfies $Ya=0$, while an output from $V'$ violates this almost surely. If $V$ has full column rank, a similar separation arises from symmetry constraints such as $V^\top Y$ being symmetric; for a non-aligned $V'$, this identity holds only with probability zero.
 
 Therefore, projection alone does not create the distributional overlap required by DP. This directly applies to the first step of standard LoRA with $B_0=0$, which can be written as a random projection of the gradient. LoRA's random initialization is therefore not "privacy for free": DP still requires additional additive noise.
 
