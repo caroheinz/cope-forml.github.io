@@ -1,5 +1,5 @@
 ---
-title: Amartya co-organised Copenhagen summer events
+title: Summer School and Workshops at Copenhagen
 date: 2026-06-27
 featured: true
 ---
